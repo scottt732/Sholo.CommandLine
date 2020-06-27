@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Build">
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.5" />
+  </ItemGroup>
+
+  <PropertyGroup Label="Package">
+    <Product>Sholo.CommandLine</Product>
+    <Description>Framework for command line applications based on natemcmaster/CommandLineUtils</Description>
+    <PackageTags>CommandLine;cli</PackageTags>
+  </PropertyGroup>
+
+</Project>
