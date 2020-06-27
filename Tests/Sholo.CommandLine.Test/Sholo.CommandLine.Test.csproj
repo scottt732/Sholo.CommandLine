@@ -8,4 +8,8 @@
     <ProjectReference Include="..\..\Source\Sholo.CommandLine\Sholo.CommandLine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Moq" Version="4.14.4" />
+  </ItemGroup>
+
 </Project>
