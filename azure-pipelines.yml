@@ -18,6 +18,10 @@ stages:
     pool: $(BuildPool)
     timeoutInMinutes: 10
     steps:
+    - task: DeleteFiles@1
+      inputs:
+        contents: |
+          $(Agent.BuildDirectory)
     - checkout: self
       lfs: true
     - task: UseDotNet@2
