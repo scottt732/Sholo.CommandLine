@@ -55,7 +55,7 @@ stages:
       displayName: 'Publish Artifacts'
 - stage: Deploy
   jobs:
-  - job: Build
+  - job: Preclean
     pool: $(BuildPool)
     timeoutInMinutes: 10
     steps:
@@ -64,6 +64,7 @@ stages:
         contents: |
           $(Agent.BuildDirectory)
   - deployment: AzureArtifacts
+    dependsOn: Preclean
     displayName: 'Azure Artifacts'
     condition: ne(variables['Build.Reason'], 'PullRequest')
     pool: $(BuildPool)
@@ -82,6 +83,7 @@ stages:
             displayName: 'NuGet Push'
             failOnStderr: true
   - deployment: NuGet
+    dependsOn: Preclean
     condition: and(ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.sourceBranch'], 'refs/tags/'))
     pool: $(BuildPool)
     environment: 'Build'
