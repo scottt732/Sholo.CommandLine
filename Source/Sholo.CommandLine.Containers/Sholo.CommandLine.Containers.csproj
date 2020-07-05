@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <ParentDirectoryBuildProps>$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))</ParentDirectoryBuildProps>
+  </PropertyGroup>
+  <Import Project="$(ParentDirectoryBuildProps)" Condition="Exists('$(ParentDirectoryBuildProps)')"/>
+
+  <PropertyGroup Label="Build">
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
@@ -12,5 +17,11 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="[3.0.0,4.0.0)" />
     <PackageReference Include="YamlDotNet" Version="[8.0.0,9.0.0)" />
   </ItemGroup>
+
+  <PropertyGroup Label="Package">
+    <Product>Sholo.CommandLine.Containers</Product>
+    <Description>Logging, configuration and versioning conventions for building containerized commandline applications on top of Microsoft.Extensions.Hosting</Description>
+    <PackageTags>CommandLine;cli;containers;docker</PackageTags>
+  </PropertyGroup>
 
 </Project>
