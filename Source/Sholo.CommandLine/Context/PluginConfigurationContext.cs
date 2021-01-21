@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,14 +9,16 @@ namespace Sholo.CommandLine.Context
 {
     internal class PluginConfigurationContext : BasePluginConfigurationContext, IPluginConfigurationContext
     {
-        public Action<ICommandServicesContext, IServiceCollection> ConfigureCommonCommandServices { get; }
+        public IList<IServicesConfiguration<ICommandServicesContext>> ConfigureCommonCommandServices { get; }
+        public IList<IServicesConfiguration<ICommandServicesContext>> ConfigureCommonCommandContainer { get; }
 
         public PluginConfigurationContext(
             IConfigurationRoot hostConfiguration,
             IServiceProvider hostServices,
             Action<ILoggingBuilder> configureLogBuilder,
             Action<ICommandConfigurationContext, IConfigurationBuilder> configureCommonConfiguration,
-            Action<ICommandServicesContext, IServiceCollection> configureCommonCommandServices)
+            IList<IServicesConfiguration<ICommandServicesContext>> configureCommonCommandServices,
+            IList<IServicesConfiguration<ICommandServicesContext>> configureCommonCommandContainer)
             : base(
                 hostConfiguration,
                 hostServices,
@@ -23,20 +26,23 @@ namespace Sholo.CommandLine.Context
                 configureCommonConfiguration)
         {
             ConfigureCommonCommandServices = configureCommonCommandServices;
+            ConfigureCommonCommandContainer = configureCommonCommandContainer;
         }
     }
 
     internal class PluginConfigurationContext<TCommandParameters> : BasePluginConfigurationContext, IPluginConfigurationContext<TCommandParameters>
         where TCommandParameters : class, new()
     {
-        public Action<ICommandServicesContext<TCommandParameters>, IServiceCollection> ConfigureCommonCommandServices { get; }
+        public IList<IServicesConfiguration<ICommandServicesContext>> ConfigureCommonCommandServices { get; }
+        public IList<IServicesConfiguration<ICommandServicesContext>> ConfigureCommonCommandContainer { get; }
 
         public PluginConfigurationContext(
             IConfigurationRoot hostConfiguration,
             IServiceProvider hostServices,
             Action<ILoggingBuilder> configureLogBuilder,
             Action<ICommandConfigurationContext, IConfigurationBuilder> configureCommonConfiguration,
-            Action<ICommandServicesContext<TCommandParameters>, IServiceCollection> configureCommonCommandServices)
+            IList<IServicesConfiguration<ICommandServicesContext>> configureCommonCommandServices,
+            IList<IServicesConfiguration<ICommandServicesContext>> configureCommonCommandContainer)
             : base(
                 hostConfiguration,
                 hostServices,
@@ -44,6 +50,7 @@ namespace Sholo.CommandLine.Context
                 configureCommonConfiguration)
         {
             ConfigureCommonCommandServices = configureCommonCommandServices;
+            ConfigureCommonCommandContainer = configureCommonCommandContainer;
         }
     }
 }

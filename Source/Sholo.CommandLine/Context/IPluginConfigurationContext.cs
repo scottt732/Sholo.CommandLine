@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,8 @@ namespace Sholo.CommandLine.Context
         IServiceProvider HostServices { get; }
         Action<ILoggingBuilder> ConfigureLogBuilder { get; }
         Action<ICommandConfigurationContext, IConfigurationBuilder> ConfigureCommonConfiguration { get; }
-        Action<ICommandServicesContext, IServiceCollection> ConfigureCommonCommandServices { get; }
+        IList<IServicesConfiguration<ICommandServicesContext>> ConfigureCommonCommandServices { get; }
+        IList<IServicesConfiguration<ICommandServicesContext>> ConfigureCommonCommandContainer { get; }
     }
 
     public interface IPluginConfigurationContext<in TCommandParameters>
@@ -22,6 +24,7 @@ namespace Sholo.CommandLine.Context
         IServiceProvider HostServices { get; }
         Action<ILoggingBuilder> ConfigureLogBuilder { get; }
         Action<ICommandConfigurationContext, IConfigurationBuilder> ConfigureCommonConfiguration { get; }
-        Action<ICommandServicesContext<TCommandParameters>, IServiceCollection> ConfigureCommonCommandServices { get; }
+        IList<IServicesConfiguration<ICommandServicesContext>> ConfigureCommonCommandServices { get; }
+        IList<IServicesConfiguration<ICommandServicesContext>> ConfigureCommonCommandContainer { get; }
     }
 }

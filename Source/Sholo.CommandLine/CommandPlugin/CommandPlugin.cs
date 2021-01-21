@@ -66,7 +66,7 @@ namespace Sholo.CommandLine.CommandPlugin
             });
             commandServices.AddSingleton<ICommand, TCommand>();
 
-            buildContext.ConfigureCommonCommandServices(commandServicesContext, commandServices);
+            buildContext.ConfigureCommonCommandServices();
             ConfigureCommandServices(commandServicesContext, commandServices);
 
             var serviceProvider = commandServices.BuildServiceProvider();
@@ -170,7 +170,7 @@ namespace Sholo.CommandLine.CommandPlugin
             });
             commandServices.AddSingleton<ICommand<TCommandParameters>, TCommand>();
 
-            buildContext.ConfigureCommonCommandServices(commandServicesContext, commandServices);
+            buildContext.ConfigureCommonCommandServices();
             ConfigureCommandServices(commandServicesContext, commandServices);
 
             var serviceProvider = commandServices.BuildServiceProvider();
