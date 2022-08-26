@@ -1,11 +1,15 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Sholo.CommandLine.Builders.Services.CommandPlugin;
 using Sholo.CommandLine.Command;
 using Sholo.CommandLine.Context;
+using Sholo.CommandLine.Context.PluginConfiguration;
 
 // ReSharper disable UnusedVariable
 // ReSharper disable UnusedMember.Global
@@ -15,38 +19,39 @@ namespace Sholo.CommandLine.CommandPlugin
     public class CommandPlugin<TCommand> : BaseCommandPlugin, ICommandPlugin<TCommand>
         where TCommand : class, ICommand
     {
-        public CommandPlugin(string commandName, string description)
-            : base(commandName, description)
+        public CommandPlugin(string description)
+            : base(description)
         {
         }
 
-        public virtual void ConfigureCommandServices(ICommandServicesContext context, IServiceCollection services)
+        public virtual void ConfigureCommandServices(ICommandServicesContext context, IServiceCollection configure)
         {
         }
 
-        public override void ConfigureCommand(IPluginConfigurationContext buildContext, CommandLineApplication command)
+        public virtual void ConfigureCommandContainer<TContainerBuilder>(ICommandServicesContext context, TContainerBuilder configure)
+        {
+        }
+
+        public override void ConfigureCommand(IPluginConfigurationContext context, CommandLineApplication command)
         {
             command.OnExecuteAsync(async cancellationToken =>
             {
-                var (commandConfigurationContext, commandConfiguration) = BuildCommandConfiguration(buildContext);
+                var (commandConfigurationContext, commandConfiguration) = BuildCommandConfiguration(context);
 
-                var (commandServicesContext, serviceProvider) = BuildCommandServiceProvider(
-                    buildContext,
-                    commandConfiguration);
+                var (commandServicesContext, serviceProvider) = BuildCommandServiceProvider(context, commandConfiguration);
 
                 var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
-                using (var scope = scopeFactory.CreateScope())
-                {
-                    var scopeServiceProvider = scope.ServiceProvider;
+                using var scope = scopeFactory.CreateScope();
 
-                    return await BuildAndRunCommand(
-                        buildContext,
-                        command,
-                        commandConfiguration,
-                        scopeServiceProvider,
-                        commandServicesContext,
-                        cancellationToken);
-                }
+                var scopeServiceProvider = scope.ServiceProvider;
+
+                return await BuildAndRunCommand(
+                    context,
+                    command,
+                    commandConfiguration,
+                    scopeServiceProvider,
+                    commandServicesContext,
+                    cancellationToken);
             });
         }
 
@@ -57,21 +62,32 @@ namespace Sholo.CommandLine.CommandPlugin
             var commandServicesContext = new CommandServicesContext(
                 buildContext.HostConfiguration,
                 buildContext.HostServices,
-                commandConfiguration);
+                commandConfiguration
+            );
 
-            var commandServices = new ServiceCollection();
-            commandServices.AddLogging(loggingBuilder =>
+            var commandPluginServiceProviderFactoryBuilder = new CommandPluginServiceProviderFactoryBuilder(
+                buildContext.HostServiceProviderFactoryBuilder,
+                buildContext.ParentServiceProviderFactoryBuilder
+            );
+
+            commandPluginServiceProviderFactoryBuilder.AddServicesConfiguration((ctx, sc) =>
             {
-                buildContext.ConfigureLogBuilder(loggingBuilder);
+                sc.AddSingleton(buildContext.LoggerFactory);
+                sc.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+                sc.AddSingleton<ICommand, TCommand>();
             });
-            commandServices.AddSingleton<ICommand, TCommand>();
 
-            buildContext.ConfigureCommonCommandServices();
-            ConfigureCommandServices(commandServicesContext, commandServices);
+            var serviceProviderFactoryBuilders = buildContext.GetServiceProviderFactoryBuilders(
+                commandPluginServiceProviderFactoryBuilder,
+                true
+            );
 
-            var serviceProvider = commandServices.BuildServiceProvider();
+            var commandServices = buildContext.HostServiceProviderFactoryBuilder.BuildCommandPluginServiceProvider(
+                serviceProviderFactoryBuilders.ToArray()
+            );
 
-            return (commandServicesContext, serviceProvider);
+            return (commandServicesContext, commandServices);
         }
 
 #pragma warning disable CA1801
@@ -100,50 +116,53 @@ namespace Sholo.CommandLine.CommandPlugin
         where TCommand : class, ICommand<TCommandParameters>
         where TCommandParameters : class, new()
     {
-        public CommandPlugin(string commandName, string description)
-            : base(commandName, description)
+        public CommandPlugin(string description)
+            : base(description)
         {
         }
 
-        public virtual void ConfigureParameters(ICommandParameterizationContext context, TCommandParameters parameters)
+        public virtual void ConfigureParameters(ICommandParameterizationContext context, TCommandParameters configure)
         {
         }
 
-        public virtual void ConfigureCommandServices(ICommandServicesContext<TCommandParameters> context, IServiceCollection services)
+        public virtual void ConfigureCommandServices(ICommandServicesContext<TCommandParameters> context, IServiceCollection configure)
         {
         }
 
-        public override void ConfigureCommand(IPluginConfigurationContext buildContext, CommandLineApplication command)
+        public virtual void ConfigureCommandContainer<TContainerBuilder>(ICommandServicesContext<TCommandParameters> context, TContainerBuilder configure)
+        {
+        }
+
+        public override void ConfigureCommand(IPluginConfigurationContext context, CommandLineApplication command)
         {
             command.OnExecuteAsync(async cancellationToken =>
             {
-                var (commandConfigurationContext, commandConfiguration) = BuildCommandConfiguration(buildContext);
+                var (commandConfigurationContext, commandConfiguration) = BuildCommandConfiguration(context);
 
                 var (commandParameterizationContext, parameters) = BuildParameters(
-                    buildContext,
+                    context,
                     command,
                     commandConfiguration);
 
                 var (commandServicesContext, serviceProvider) = BuildCommandServiceProvider(
-                    buildContext,
+                    context,
                     commandConfiguration,
                     parameters,
                     this);
 
                 var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
-                using (var scope = scopeFactory.CreateScope())
-                {
-                    var scopeServiceProvider = scope.ServiceProvider;
+                using var scope = scopeFactory.CreateScope();
 
-                    return await BuildAndRunCommand(
-                        buildContext,
-                        command,
-                        commandConfiguration,
-                        scopeServiceProvider,
-                        commandServicesContext,
-                        parameters,
-                        cancellationToken);
-                }
+                var scopeServiceProvider = scope.ServiceProvider;
+
+                return await BuildAndRunCommand(
+                    context,
+                    command,
+                    commandConfiguration,
+                    scopeServiceProvider,
+                    commandServicesContext,
+                    parameters,
+                    cancellationToken);
             });
         }
 
@@ -161,21 +180,31 @@ namespace Sholo.CommandLine.CommandPlugin
                 buildContext.HostConfiguration,
                 buildContext.HostServices,
                 commandConfiguration,
-                parameters);
+                parameters
+            );
 
-            var commandServices = new ServiceCollection();
-            commandServices.AddLogging(loggingBuilder =>
+            var commandPluginServiceProviderFactoryBuilder = new CommandPluginServiceProviderFactoryBuilder<TCommandParameters>(
+                buildContext.HostServiceProviderFactoryBuilder
+            );
+
+            commandPluginServiceProviderFactoryBuilder.AddServicesConfiguration((ctx, sc) =>
             {
-                buildContext.ConfigureLogBuilder(loggingBuilder);
+                sc.AddSingleton(buildContext.LoggerFactory);
+                sc.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+                sc.AddSingleton<ICommand<TCommandParameters>, TCommand>();
             });
-            commandServices.AddSingleton<ICommand<TCommandParameters>, TCommand>();
 
-            buildContext.ConfigureCommonCommandServices();
-            ConfigureCommandServices(commandServicesContext, commandServices);
+            var serviceProviderFactoryBuilders = buildContext.GetServiceProviderFactoryBuilders(
+                commandPluginServiceProviderFactoryBuilder,
+                true
+            );
 
-            var serviceProvider = commandServices.BuildServiceProvider();
+            var commandServices = buildContext.HostServiceProviderFactoryBuilder.BuildCommandPluginServiceProvider(
+                serviceProviderFactoryBuilders.ToArray()
+            );
 
-            return (commandServicesContext, serviceProvider);
+            return (commandServicesContext, commandServices);
         }
 
 #pragma warning disable CA1801

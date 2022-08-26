@@ -1,5 +1,3 @@
-using Sholo.CommandLine.AppBuilder;
-
 namespace Sholo.CommandLine
 {
     // Inherit from the base class.

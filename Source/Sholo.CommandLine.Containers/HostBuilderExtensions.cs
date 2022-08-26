@@ -17,10 +17,7 @@ namespace Sholo.CommandLine.Containers
             TOptions options = null;
             Parser.Default.ParseArguments<TOptions>(args).WithParsed(o => options = o);
 
-            if (options != null)
-            {
-                hostBuilder.Properties[ContextPropertyName] = options;
-            }
+            hostBuilder.Properties[ContextPropertyName] = options;
 
             return hostBuilder;
         }

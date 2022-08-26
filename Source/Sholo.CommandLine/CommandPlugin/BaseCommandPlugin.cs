@@ -1,17 +1,18 @@
-﻿using McMaster.Extensions.CommandLineUtils;
+using System;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Sholo.CommandLine.Context;
+using Sholo.CommandLine.Context.PluginConfiguration;
 
 namespace Sholo.CommandLine.CommandPlugin
 {
-    public abstract class BaseCommandPlugin : ICommonCommandPlugin
+    public abstract class BaseCommandPlugin : ICommandPlugin
     {
-        public string CommandName { get; }
         public string Description { get; }
 
-        protected BaseCommandPlugin(string commandName, string description)
+        protected BaseCommandPlugin(string description)
         {
-            CommandName = commandName;
             Description = description;
         }
 
@@ -31,7 +32,12 @@ namespace Sholo.CommandLine.CommandPlugin
                 buildContext.HostServices);
 
             var commandConfigurationBuilder = new ConfigurationBuilder();
-            buildContext.ConfigureCommonConfiguration(commandConfigurationContext, commandConfigurationBuilder);
+
+            buildContext.CommonCommandConfigurationConfigurator.ConfigureConfigurationBuilder(
+                commandConfigurationContext,
+                commandConfigurationBuilder
+            );
+
             ConfigureCommandConfiguration(commandConfigurationContext, commandConfigurationBuilder);
             var commandConfiguration = commandConfigurationBuilder.Build();
 

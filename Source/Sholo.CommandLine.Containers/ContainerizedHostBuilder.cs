@@ -36,7 +36,7 @@ namespace Sholo.CommandLine.Containers
                             var configFile = options.ConfigFile;
                             if (!File.Exists(configFile))
                             {
-                                throw new Exception("The config file specified does not exist");
+                                throw new InvalidOperationException("The config file specified does not exist");
                             }
 
                             var configFileExtension = Path.GetExtension(configFile);
@@ -51,7 +51,7 @@ namespace Sholo.CommandLine.Containers
                             }
                             else
                             {
-                                throw new Exception($"Unsupported config file extension: {configFileExtension}.  Expecting .yaml or .json");
+                                throw new InvalidOperationException($"Unsupported config file extension: {configFileExtension}.  Expecting .yaml or .json");
                             }
                         }
                         else

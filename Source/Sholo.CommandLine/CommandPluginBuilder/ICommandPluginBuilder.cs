@@ -6,25 +6,21 @@ using Sholo.CommandLine.Context;
 // ReSharper disable UnusedMember.Global
 namespace Sholo.CommandLine.CommandPluginBuilder
 {
-    public interface ICommandPluginBuilder<out TSelf, TCommand, out TParameters> : ICommonCommandPluginBuilder<TSelf>
+    public interface ICommandPluginBuilder<out TSelf, TCommand> : ICoreCommandPluginBuilder<TSelf>
+        where TSelf : ICommandPluginBuilder<TSelf, TCommand>
+        where TCommand : ICommand
+    {
+        TSelf ConfigureCommandServices(Action<ICommandServicesContext, IServiceCollection> configure);
+        TSelf ConfigureCommandContainer<TContainerBuilder>(Action<ICommandServicesContext, TContainerBuilder> configure);
+    }
+
+    public interface ICommandPluginBuilder<out TSelf, TCommand, out TParameters> : ICoreCommandPluginBuilder<TSelf>
         where TSelf : ICommandPluginBuilder<TSelf, TCommand, TParameters>
         where TCommand : ICommand<TParameters>
         where TParameters : class, new()
     {
+        TSelf ConfigureCommandServices(Action<ICommandServicesContext<TParameters>, IServiceCollection> configure);
+        TSelf ConfigureCommandContainer<TContainerBuilder>(Action<ICommandServicesContext<TParameters>, TContainerBuilder> configure);
         TSelf ConfigureParameters(Action<ICommandParameterizationContext, TParameters> parameters);
-        TSelf ConfigureCommandServices(Action<ICommandServicesContext<TParameters>, IServiceCollection> services);
-    }
-
-    public interface ICommandPluginBuilder<out TSelf, TCommand> : ICommonCommandPluginBuilder<TSelf>
-        where TSelf : ICommandPluginBuilder<TSelf, TCommand>
-        where TCommand : ICommand
-    {
-        TSelf ConfigureCommandServices(Action<ICommandServicesContext, IServiceCollection> services);
-    }
-
-    public interface ICommandPluginBuilder<out TSelf> : ICommonCommandPluginBuilder<TSelf>
-        where TSelf : ICommandPluginBuilder<TSelf>
-    {
-        TSelf ConfigureCommandServices(Action<ICommandServicesContext, IServiceCollection> services);
     }
 }
