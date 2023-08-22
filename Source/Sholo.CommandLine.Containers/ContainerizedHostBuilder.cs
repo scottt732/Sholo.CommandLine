@@ -57,6 +57,7 @@ namespace Sholo.CommandLine.Containers
                         else
                         {
                             cb.AddYamlFile("config.yaml", true);
+                            cb.AddYamlFile("config.yml", true);
                             cb.AddJsonFile("config.json", true);
                         }
 
