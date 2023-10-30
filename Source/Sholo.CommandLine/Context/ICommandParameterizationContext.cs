@@ -4,14 +4,13 @@ using Microsoft.Extensions.Configuration;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedMemberInSuper.Global
-namespace Sholo.CommandLine.Context
+namespace Sholo.CommandLine.Context;
+
+public interface ICommandParameterizationContext
 {
-    public interface ICommandParameterizationContext
-    {
-        IConfigurationRoot HostConfiguration { get; }
-        IServiceProvider HostServices { get; }
-        IConfigurationRoot CommandConfiguration { get; }
-        IServiceProvider ServiceProvider { get; set; }
-        CommandLineApplication Command { get; }
-    }
+    IConfigurationRoot HostConfiguration { get; }
+    IServiceProvider HostServices { get; }
+    IConfigurationRoot CommandConfiguration { get; }
+    IServiceProvider ServiceProvider { get; set; }
+    CommandLineApplication Command { get; }
 }

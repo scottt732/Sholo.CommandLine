@@ -1,15 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Build">
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="[4.0.1,5.0.0)" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="[3.0.0,8.0.0)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="[3.0.0,8.0.0)" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="[3.0.0,8.0.0)" />
-    <PackageReference Include="System.Runtime.Loader" Version="[4.3.0,6.0.0)" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="[4.1.0,5.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="[7.0.0,)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="[7.0.0,)" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="[7.0.0,)" />
+    <PackageReference Include="System.Runtime.Loader" Version="[4.3.0,5.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' != 'HomeAutomation'">
+    <PackageReference Include="Sholo.Utils" Version="*-*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' == 'HomeAutomation'">
+    <ProjectReference Include="$(SmartSolutionDir)\Libraries\Sholo.Utils\Source\Sholo.Utils\Sholo.Utils.csproj" />
   </ItemGroup>
 
   <PropertyGroup Label="Package">

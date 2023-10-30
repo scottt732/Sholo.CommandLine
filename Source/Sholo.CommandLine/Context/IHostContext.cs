@@ -1,6 +1,5 @@
-namespace Sholo.CommandLine.Context
+namespace Sholo.CommandLine.Context;
+
+public interface IHostContext
 {
-    public interface IHostContext
-    {
-    }
 }

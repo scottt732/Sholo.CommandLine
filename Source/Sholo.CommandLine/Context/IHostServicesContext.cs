@@ -1,10 +1,9 @@
 using Microsoft.Extensions.Configuration;
 
 // ReSharper disable UnusedMemberInSuper.Global
-namespace Sholo.CommandLine.Context
+namespace Sholo.CommandLine.Context;
+
+public interface IHostServicesContext
 {
-    public interface IHostServicesContext
-    {
-        IConfigurationRoot HostConfiguration { get; }
-    }
+    IConfigurationRoot HostConfiguration { get; }
 }

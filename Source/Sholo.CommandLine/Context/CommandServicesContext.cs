@@ -2,47 +2,56 @@ using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sholo.CommandLine.CommandPlugins;
 
-namespace Sholo.CommandLine.Context
+namespace Sholo.CommandLine.Context;
+
+internal class CommandServicesContext : ICommandServicesContext
 {
-    internal class CommandServicesContext : ICommandServicesContext
-    {
-        public ILoggerFactory LoggerFactory { get; }
-        public IConfiguration HostConfiguration { get; }
-        public IConfiguration CommandConfiguration { get; }
-        public IServiceProvider HostServices { get; }
+    public string CommandName { get; }
+    public string Description { get; }
 
-        public CommandServicesContext(
-            IConfiguration hostConfiguration,
-            IServiceProvider hostServices,
-            IConfiguration commandConfiguration
-        )
-        {
-            HostConfiguration = hostConfiguration;
-            HostServices = hostServices;
-            LoggerFactory = hostServices.GetRequiredService<ILoggerFactory>();
-            CommandConfiguration = commandConfiguration;
-        }
+    public ILoggerFactory LoggerFactory { get; }
+    public IConfiguration HostConfiguration { get; }
+    public IConfiguration CommandConfiguration { get; }
+    public IServiceProvider HostServices { get; }
+
+    public CommandServicesContext(
+        ICommonCommandPlugin commandPlugin,
+        IConfiguration hostConfiguration,
+        IServiceProvider hostServices,
+        IConfiguration commandConfiguration
+    )
+    {
+        CommandName = commandPlugin.CommandName;
+        Description = commandPlugin.Description;
+
+        HostConfiguration = hostConfiguration;
+        HostServices = hostServices;
+        LoggerFactory = hostServices.GetRequiredService<ILoggerFactory>();
+        CommandConfiguration = commandConfiguration;
     }
+}
 
-    internal class CommandServicesContext<TCommandParameters> : CommandServicesContext, ICommandServicesContext<TCommandParameters>
-        where TCommandParameters : class, new()
-    {
-        public TCommandParameters Parameters { get; }
+internal class CommandServicesContext<TCommandParameters> : CommandServicesContext, ICommandServicesContext<TCommandParameters>
+    where TCommandParameters : class, new()
+{
+    public TCommandParameters Parameters { get; }
 
-        public CommandServicesContext(
-            IConfiguration hostConfiguration,
-            IServiceProvider hostServices,
-            IConfiguration commandConfiguration,
-            TCommandParameters parameters
+    public CommandServicesContext(
+        ICommonCommandPlugin commandPlugin,
+        IConfiguration hostConfiguration,
+        IServiceProvider hostServices,
+        IConfiguration commandConfiguration,
+        TCommandParameters parameters
+    )
+        : base(
+            commandPlugin,
+            hostConfiguration,
+            hostServices,
+            commandConfiguration
         )
-            : base(
-                hostConfiguration,
-                hostServices,
-                commandConfiguration
-            )
-        {
-            Parameters = parameters;
-        }
+    {
+        Parameters = parameters;
     }
 }

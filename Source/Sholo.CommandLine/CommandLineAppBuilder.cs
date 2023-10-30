@@ -1,9 +1,8 @@
 using Sholo.CommandLine.AppBuilder;
 
-namespace Sholo.CommandLine
+namespace Sholo.CommandLine;
+
+// Inherit from the base class.
+public sealed class CommandLineAppBuilder : BaseCommandLineAppBuilder<CommandLineAppBuilder>
 {
-    // Inherit from the base class.
-    public sealed class CommandLineAppBuilder : BaseCommandLineAppBuilder<CommandLineAppBuilder>
-    {
-    }
 }

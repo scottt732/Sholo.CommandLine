@@ -1,6 +1,5 @@
-namespace Sholo.CommandLine.Context
+namespace Sholo.CommandLine.Context;
+
+internal class HostContext : IHostContext
 {
-    internal class HostContext : IHostContext
-    {
-    }
 }
