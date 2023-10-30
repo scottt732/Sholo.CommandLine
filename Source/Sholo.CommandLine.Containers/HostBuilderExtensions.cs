@@ -5,62 +5,57 @@ using System.Reflection;
 using CommandLine;
 using Microsoft.Extensions.Hosting;
 
-namespace Sholo.CommandLine.Containers
+namespace Sholo.CommandLine.Containers;
+
+public static class HostBuilderExtensions
 {
-    public static class HostBuilderExtensions
+    public static readonly string ContextPropertyName = "CommandLineArguments";
+
+    public static IHostBuilder UseOptions<TOptions>(this IHostBuilder hostBuilder, string[] args)
+        where TOptions : ContainerizedAppOptions
     {
-        public static readonly string ContextPropertyName = "CommandLineArguments";
+        TOptions options = null;
+        Parser.Default.ParseArguments<TOptions>(args).WithParsed(o => options = o);
 
-        public static IHostBuilder UseOptions<TOptions>(this IHostBuilder hostBuilder, string[] args)
-            where TOptions : ContainerizedAppOptions
+        if (options != null)
         {
-            TOptions options = null;
-            Parser.Default.ParseArguments<TOptions>(args).WithParsed(o => options = o);
-
-            if (options != null)
-            {
-                hostBuilder.Properties[ContextPropertyName] = options;
-            }
-
-            return hostBuilder;
+            hostBuilder.Properties[ContextPropertyName] = options;
         }
 
-        public static IHostBuilder UseVersionResource(this IHostBuilder hostBuilder, string applicationName = null)
-        {
-            var entryAssembly = Assembly.GetEntryAssembly();
-            var name = applicationName ?? entryAssembly?.GetName().Name ?? Environment.GetCommandLineArgs().FirstOrDefault();
+        return hostBuilder;
+    }
 
-            string version = null;
-            if (entryAssembly != null)
+    public static IHostBuilder UseVersionResource(this IHostBuilder hostBuilder, string applicationName = null)
+    {
+        var entryAssembly = Assembly.GetEntryAssembly();
+        var name = applicationName ?? entryAssembly?.GetName().Name ?? Environment.GetCommandLineArgs().FirstOrDefault();
+
+        string version = null;
+        if (entryAssembly != null)
+        {
+            var resourceName = entryAssembly.GetManifestResourceNames().SingleOrDefault(str => str.EndsWith("VERSION", StringComparison.Ordinal));
+            if (resourceName != null)
             {
-                var resourceName = entryAssembly.GetManifestResourceNames().SingleOrDefault(str => str.EndsWith("VERSION", StringComparison.Ordinal));
-                if (resourceName != null)
+                using var stream = entryAssembly.GetManifestResourceStream(resourceName);
+                if (stream != null)
                 {
-                    using (var stream = entryAssembly.GetManifestResourceStream(resourceName))
+                    using var sr = new StreamReader(stream);
+                    var versionLine = sr.ReadLine();
+                    if (versionLine != null)
                     {
-                        if (stream != null)
+                        var versionParts = versionLine.Split('.');
+                        if (versionParts.Length == 2 && versionParts[0].All(char.IsDigit) && versionParts[1].All(char.IsDigit))
                         {
-                            using (var sr = new StreamReader(stream))
-                            {
-                                var versionLine = sr.ReadLine();
-                                if (versionLine != null)
-                                {
-                                    var versionParts = versionLine.Split('.');
-                                    if (versionParts.Length == 2 && versionParts[0].All(char.IsDigit) && versionParts[1].All(char.IsDigit))
-                                    {
-                                        version = versionLine;
-                                    }
-                                }
-                            }
+                            version = versionLine;
                         }
                     }
                 }
             }
-
-            hostBuilder.Properties["ApplicationName"] = name;
-            hostBuilder.Properties["ApplicationVersion"] = version;
-
-            return hostBuilder;
         }
+
+        hostBuilder.Properties["ApplicationName"] = name;
+        hostBuilder.Properties["ApplicationVersion"] = version;
+
+        return hostBuilder;
     }
 }

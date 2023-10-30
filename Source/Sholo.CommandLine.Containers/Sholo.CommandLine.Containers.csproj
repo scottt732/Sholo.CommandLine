@@ -1,16 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Build">
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="[2.9.1,3.0.0)" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="[3.0.0,8.0.0)" />
-    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="[2.2.0,3.0.0)" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="[3.1.0,4.0.0)" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="[4.0.1,5.0.0)" />
-    <PackageReference Include="YamlDotNet" Version="[12.0.0,13.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' != 'HomeAutomation'">
+    <PackageReference Include="Sholo.Utils" Version="*-*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' == 'HomeAutomation'">
+    <ProjectReference Include="$(SmartSolutionDir)\Libraries\Sholo.Utils\Source\Sholo.Utils\Sholo.Utils.csproj" />
   </ItemGroup>
 
   <PropertyGroup Label="Package">
