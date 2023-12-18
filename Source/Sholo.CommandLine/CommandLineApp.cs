@@ -46,7 +46,9 @@ internal class CommandLineApp : ICommandLineApp
 
             if (!cts.IsCancellationRequested)
             {
+#pragma warning disable VSTHRD103
                 cts.Cancel();
+#pragma warning restore VSTHRD103
                 e.Cancel = true;
             }
             else
@@ -63,7 +65,9 @@ internal class CommandLineApp : ICommandLineApp
 
             if (!cts.IsCancellationRequested)
             {
+#pragma warning disable VSTHRD103
                 cts.Cancel();
+#pragma warning restore VSTHRD103
             }
 
             // ReSharper restore AccessToDisposedClosure
